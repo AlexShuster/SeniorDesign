@@ -12,8 +12,9 @@ void setup() {
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-
+  // Commented out function call for now
+  //u_int8_t prediction_output = predict_two_pitch(velocity_input,spin_rate_input);
+  //digitalWrite(prediction_output,pred);
 }
 
 
@@ -33,5 +34,5 @@ u_int8_t predict_two__pitch(float velocity, float spin_rate) {
     pred = 0;
   }
   Serial.print(pred);
-  digitalWrite(prediction_output,pred);
+  return pred;
 }
