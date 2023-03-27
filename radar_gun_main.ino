@@ -4,6 +4,7 @@ const int spin_rate_input = 3;
 const int prediction_output = 4;
 
 
+
 void setup() {
   // put your setup code here, to run once:
   pinMode(velocity_input,INPUT);
@@ -14,40 +15,51 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-
 }
 
 void accuracy(uint8_t y_pred[],uint8_t y_test[],int N) {
-  int count = 0;
+  float count = 0;
   for(int i = 0; i < N; i++) {
     if(y_pred[i] == y_test[i]) {
-      count += 1;
+      count += 1.0;
     }
   }
-  float accuracy = count/N;
+  float accuracy = (count/N)*100;
   Serial.print("Accuracy: ");
   Serial.print(accuracy);
+  Serial.print("%");
+  Serial.println();
+  delay(1000);
 }
 
 
 //1 = right, 0 = left
-uint8_t predict_two__pitch( int throwing_arm, float velocity, float spin_rate) {
+uint8_t predict_two_pitch(int throwing_arm, float velocity, float spin_rate) {
+  // Serial.print("Velocity:");
+  // Serial.print(velocity);
+  // delay(1000);
   //W = weight vector from pretrained SVM Model
-  float w[3] = {0.17857464, -9.28750256, -0.17418126};
+  float w[3] = {-3.65313245,  2.26056102,  0.01852503};
   //Bias from pretrained SVM Model
-  float b = 8.792953233777773;
+  float b = -226.20329188680094;
   //Feature Vector X = [Velocity, Spin Rate]
   float X[3] = {throwing_arm, velocity, spin_rate};  
   //Linear SVM equation to get predicted value
   float y = X[0]*w[0] + X[1]*w[1] + X[2]*w[2] + b;  
+  // Serial.print("Y:");
+  // Serial.print(y);
+  // delay(1000);
   uint8_t pred = 0;
   if (y > 1){
     pred = 1;
   } else {
     pred = 0;
   }
-  Serial.print(pred);
-  digitalWrite(prediction_output,pred);
+  // Serial.print("Pred: ");
+  // Serial.print(pred);
+  // delay(1000);
+  return pred;
+  // digitalWrite(prediction_output,pred);
 }
 
 //ages 10-18, 19 == college, else is MLB
@@ -122,35 +134,36 @@ uint8_t predict_experience_two_pitch(float velocity, float spin_rate, int throwi
   digitalWrite(prediction_output,pred);
 }
 
-uint8_t predict_seven_pitch(float velocity, float spin_rate, int throwing_arm) {
+uint8_t predict_seven_pitch(int throwing_arm, float velocity, float spin_rate) {
+  Serial.println("Predict");
+  delay(1000);
   int votes[21] = {};
-  float w[21][3] = {{0.00000000e+00, -9.02715621e-01,  9.77491538e-02},
-  { 4.94073640e-05,  8.14352677e-04,  1.61067184e-02},
-  {-5.55835831e-01,  1.81048063e+00,  7.26009077e-02},
-  { 4.94073640e-05,  8.14352677e-04,  1.61067184e-02},
-  { 4.94073640e-05,  8.14352677e-04,  1.61067184e-02},
-  { 3.20928416e-01, -1.25234128e+00,  3.83802961e-02},
-  { 0.00000000e+00,  3.27482718e-03,  2.63506881e-02},
-  { 2.09213132e-03,  6.71216087e-03, -6.43026232e-02},
-  { 0.00000000e+00,  3.27482718e-03,  2.63506881e-02},
-  { 0.00000000e+00,  3.27482718e-03,  2.63506881e-02},
-  { 2.08232829e-01,  3.08854999e+00, -7.23585217e-02},
-  { 7.67145641e-05, -4.60388263e-04, -1.23778546e-02},
-  { 0.00000000e+00,  0.00000000e+00,  0.00000000e+00},
-  { 0.00000000e+00,  0.00000000e+00,  0.00000000e+00},
-  { 0.00000000e+00, -1.51181495e-03, -1.99164649e-02},
-  {-4.65142726e-05,  4.60405933e-04,  1.23783297e-02},
-  {-4.65142726e-05,  4.60405933e-04,  1.23783297e-02},
-  { 1.99216265e-01, -2.24701324e+00,  5.75598824e-02},
-  { 0.00000000e+00,  0.00000000e+00,  0.00000000e+00},
-  { 0.00000000e+00, -1.51181495e-03, -1.99164649e-02},
-  { 0.00000000e+00, -1.51181495e-03, -1.99164649e-02}};
-  float b[21] = {-5.45398808,  -1.00003293, -26.88877061,  -1.00003293,
-  -1.00003293,   1.32495099,  -1.00000001,   9.33491218,
-  -1.00000001,  -1.00000001, -17.18962364,   0.99992325,
-  1.0        ,  -1.0        ,   1.00000001,  -0.99998449,
-  -0.99998449,   5.19839461,  -1.0        ,   1.00000001,
-  1.00000001}; 
+  float w[21][3] = {{-3.10739560e-01,  5.20702136e-01, -6.83764045e-03},
+  { 2.58996548e+00, -6.54787347e-01, -1.23691071e-02},
+  { 8.13972484e-01, -8.79088375e-01, -8.52616852e-03},
+  {-6.96218206e-01, -2.76642460e-01,  5.68516672e-03},
+  { 6.90976817e-01, -7.66910512e-01, -5.07677910e-03},
+  {-6.49784252e-02,  1.39663911e-01, -1.73785198e-02},
+  { 2.00000000e+00, -1.14172807e+00,  3.65115261e-03},
+  { 4.22618487e-01, -7.03065169e-01,  3.81804400e-03},
+  {-4.44089210e-16, -2.22248945e-01,  4.40724944e-03},
+  {-2.66453526e-15, -9.28051018e-01,  9.67616056e-03},
+  { 2.43128371e+00, -2.02666155e+00 , 3.92280647e-03},
+  { 2.18393375e+00, -1.45868089e+00,  1.45338947e-02},
+  {-5.93341420e-04,  1.42401941e-03,  3.44138023e-02},
+  { 3.90410103e-01, -1.14413025e+00,  1.83126068e-02},
+  {-1.99339733e+00,  1.74644759e+00, -2.81272290e-03},
+  {-2.07952569e-01,  8.55437722e-01,  3.24837705e-01},
+  {-1.15182074e+00,  1.19963347e-01,  3.79589244e-02},
+  {-8.69423533e-01,  1.78051023e+00, -1.39887622e-02},
+  { 6.34711868e-01, -1.10844167e-01, -1.37272345e-02},
+  { 3.64232362e-01,  5.83512391e-01, -7.88401066e-03},
+  {-1.09059380e+00,  1.43819424e+00, -1.32619530e-02}};
+  float b[21] = {-28.25195968,   81.93006539,   95.34148566,   17.71115111,   78.06833111,
+   23.89277316,   87.00704062,   51.66965294,   10.72821917,   58.92121125,
+  152.15795166,   96.56032776,  -66.47300342,   61.52965166, -146.69358296,
+ -690.81157766,  -89.70806217, -126.78486059,   33.60688814,  -36.67600316,
+  -98.24881498}; 
   float pred[21] = {};
   for(int i = 0; i < 21; i++) {
     pred[i] = w[i][0]*throwing_arm + w[i][1]*velocity + w[i][2]*spin_rate + b[i];
@@ -220,11 +233,13 @@ uint8_t predict_seven_pitch(float velocity, float spin_rate, int throwing_arm) {
       class_label = i;
     }
   }
+  Serial.print("Class Label:");
+  Serial.print(class_label);
   return class_label;
 }
 
 
-uint8_t predict_experience_seven_pitch(float velocity, float spin_rate, int throwing_arm, int experience_level) {
+uint8_t predict_experience_seven_pitch(int throwing_arm, float velocity, float spin_rate, int experience_level) {
   int votes[21] = {};
   float w[21][3] = {{}};
   float b[21] = {};
@@ -608,4 +623,3 @@ uint8_t predict_experience_seven_pitch(float velocity, float spin_rate, int thro
   }
   return class_label;
 }
-
