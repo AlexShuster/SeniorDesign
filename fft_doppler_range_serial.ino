@@ -82,31 +82,36 @@ void loop()
   FFT.Windowing(vReal, samples, FFT_WIN_TYP_HAMMING, FFT_FORWARD);
   FFT.Compute(vReal, vImag, samples, FFT_FORWARD); 
   FFT.ComplexToMagnitude(vReal, vImag, samples); /* Compute magnitudes */
+  double f_rx = FFT.MajorPeak(vReal, samples, samplingFrequency);
 
-  uint16_t start_f = 4000;
-  uint16_t end_f = 10000;
+  uint16_t start_f = 200;
+  uint16_t end_f = 8000;
 
+  if (f_rx<start_f | f_rx > end_f) {
+    uint16_t min_idx = (uint16_t)(((start_f) * ((double)samples))/samplingFrequency);
+    uint16_t max_idx = (uint16_t)(((end_f) * ((double)samples))/samplingFrequency); 
 
-  uint16_t min_idx = (uint16_t)(((start_f) * ((double)samples))/samplingFrequency);
-  uint16_t max_idx = (uint16_t)(((end_f) * ((double)samples))/samplingFrequency); 
+    double freq_max_mag = 0.0;
+    uint16_t freq_max_idx = 0;
 
-  double freq_max_mag = 0.0;
-  uint16_t freq_max_idx = 0;
-
-  for (uint16_t i = min_idx; i< max_idx; i++){
-    if (vReal[i] > 5000 && vReal[i] > freq_max_mag) // TODO make better
-    {
-      freq_max_mag = vReal[i];
-      freq_max_idx = i;
+    for (uint16_t i = min_idx; i< max_idx; i++){
+      if (vReal[i] > 5000 && vReal[i] > freq_max_mag) // TODO make better
+      {
+        freq_max_mag = vReal[i];
+        freq_max_idx = i;
+      }
     }
+    double f_rx = ((freq_max_idx * 1.0 * samplingFrequency) / ((double)samples));
+    
+    
   }
-  double f_rx = ((freq_max_idx * 1.0 * samplingFrequency) / ((double)samples));
+
+
 //  Serial.print("Found bandwidth ");
 //  Serial.println(freq_band - f_rx);
 
 
-  
-  //double f_rx = FFT.MajorPeak(vReal, samples, samplingFrequency);
+ 
   uint16_t f_rx_idx = (f_rx * ((double)samples))/samplingFrequency;
   double amp = vReal[f_rx_idx];
   
